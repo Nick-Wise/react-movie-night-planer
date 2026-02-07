@@ -1,28 +1,35 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
+
 :root {
   /* Backgrounds */
-  --color-bg-main: #0F0F14;
-  --color-bg-surface: #1A1A24;
+  --color-bg-main: 15 15 20;        /* #0F0F14 */
+  --color-bg-surface: 26 26 36;     /* #1A1A24 */
 
   /* Text */
-  --color-text-primary: #E6E6EB;
-  --color-text-secondary: #A1A1B3;
+  --color-text-primary: 230 230 235;   /* #E6E6EB */
+  --color-text-secondary: 161 161 179; /* #A1A1B3 */
 
   /* Borders */
-  --color-border: #2A2A3A;
+  --color-border: 42 42 58;         /* #2A2A3A */
 
   /* Accents */
-  --color-accent-primary: #8B5CF6;
-  --color-accent-hover: #7C3AED;
-  --color-accent-muted: #5B3EA6;
+  --color-accent-primary: 139 92 246; /* #8B5CF6 */
+  --color-accent-hover: 124 58 237;   /* #7C3AED */
+  --color-accent-muted: 91 62 166;    /* #5B3EA6 */
 
-  /* Status (optional) */
-  --color-success: #22C55E;
-  --color-warning: #FACC15;
-  --color-danger: #EF4444;
+  /* Status */
+  --color-success: 34 197 94;  /* #22C55E */
+  --color-warning: 250 204 21; /* #FACC15 */
+  --color-danger: 239 68 68;   /* #EF4444 */
 }
 
-*{
+* {
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: rgb(var(--color-bg-main));
+  color: rgb(var(--color-text-primary));
 }

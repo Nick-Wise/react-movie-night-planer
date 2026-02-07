@@ -43,7 +43,7 @@ function TopPickBadge({ show }) {
       </span>
     </div>
   );
-}
+  }
 
 function MovieCard({ movie, features }) {
   const title = movie?.title ?? "Untitled";
@@ -56,7 +56,7 @@ function MovieCard({ movie, features }) {
 
 
   return (
-    <div className="bg-[var(--color-bg-surface)] p-4 rounded-lg text-center text-[var(--color-text-primary)]">
+    <div className="bg-bg-surface/95 p-4 rounded-lg text-center text-text-primary hover:ring-3 hover:ring-accent-muted">
         
       <Poster src={posterUrl} alt={`${title} poster`} />
 

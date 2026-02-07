@@ -1,8 +1,10 @@
-import React from "react";
-import MovieList from "./components/MovieList";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Browse from "./pages/Browse";
+import Watchlist from "./pages/Watchlist";
+import About from "./pages/About";
 
-
-const FEATURES ={
+const FEATURES = {
   topPicksBadge: false,
 };
 
@@ -41,11 +43,17 @@ const movies = [
 
 function App() {
   return (
-    <div className="min-h-screen flex justify-center">
-      <div className="w-full max-w-6xl px-4">
-        <MovieList movies={movies} features ={FEATURES} />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route
+          path="/"
+          element={<Browse movies={movies} features={FEATURES} />}
+        />
+        <Route path="/watchlist" element={<Watchlist movies={movies} />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
