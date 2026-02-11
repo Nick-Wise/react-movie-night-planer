@@ -2,7 +2,7 @@
 import { NavLink } from "react-router-dom";
 
 const linkBase =
-  "px-3 py-2 rounded-md text-sm font-medium transition-colors";
+  "px-3 py-2 rounded-md text-lg font-medium transition-colors";
 
 const linkInactive =
   "text-text-secondary hover:text-text-primary hover:bg-bg-surface";
