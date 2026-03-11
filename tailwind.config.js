@@ -18,6 +18,7 @@ export default {
           primary: "rgb(var(--color-accent-primary) / <alpha-value>)",
           hover: "rgb(var(--color-accent-hover) / <alpha-value>)",
           muted: "rgb(var(--color-accent-muted) / <alpha-value>)",
+          soft: "rgb(var(--color-accent-soft) / <alpha-value>)",
         },
         success: "rgb(var(--color-success) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",

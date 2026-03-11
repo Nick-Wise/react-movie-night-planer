@@ -8,9 +8,11 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:5174"
     }
+  },
+  test: {
+    environment: "node",
   }
 });
 
 
 // https://vite.dev/config/
-
