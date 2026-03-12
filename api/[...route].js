@@ -1,4 +1,3 @@
-import serverless from "serverless-http";
 import { createApp } from "../server/app.js";
 import { getServerConfig } from "../server/config.js";
 import { createMovieProvider } from "../server/movieProvider.js";
@@ -12,4 +11,4 @@ const app = createApp({
   clientOrigin: config.clientOrigin,
 });
 
-export default serverless(app);
+export default app;
