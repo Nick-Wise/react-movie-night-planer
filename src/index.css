@@ -7,10 +7,10 @@
   --color-text-primary: 242 243 245;
   --color-text-secondary: 164 174 192;
   --color-border: 62 78 97;
-  --color-accent-primary: 222 91 60;
-  --color-accent-hover: 245 114 80;
-  --color-accent-muted: 156 66 47;
-  --color-accent-soft: 255 181 145;
+  --color-accent-primary: 168 85 247;
+  --color-accent-hover: 192 132 252;
+  --color-accent-muted: 107 33 168;
+  --color-accent-soft: 221 214 254;
   --color-success: 74 222 128;
   --color-warning: 250 204 21;
   --color-danger: 248 113 113;
@@ -22,7 +22,7 @@
 
 html {
   background:
-    radial-gradient(circle at top, rgba(222, 91, 60, 0.14), transparent 32%),
+    radial-gradient(circle at top, rgba(168, 85, 247, 0.16), transparent 32%),
     linear-gradient(180deg, rgba(11, 16, 24, 1), rgba(7, 11, 18, 1));
 }
 

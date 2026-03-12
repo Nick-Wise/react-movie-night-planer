@@ -1,12 +1,13 @@
-import db from "./db.js";
 import { createApp } from "./app.js";
 import { getServerConfig } from "./config.js";
 import { createMovieProvider } from "./movieProvider.js";
+import { createSupabaseWatchlistStore } from "./watchlistStore.js";
 
 const config = getServerConfig();
 const movieProvider = createMovieProvider(config);
+const watchlistStore = createSupabaseWatchlistStore(config);
 const app = createApp({
-  db,
+  watchlistStore,
   movieProvider,
   clientOrigin: config.clientOrigin,
 });

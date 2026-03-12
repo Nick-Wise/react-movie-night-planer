@@ -5,7 +5,7 @@ const baseLinkClasses =
 const inactiveLinkClasses =
   "text-text-secondary hover:bg-bg-surface hover:text-text-primary";
 const activeLinkClasses =
-  "bg-accent-primary text-white shadow-[0_10px_30px_rgba(222,91,60,0.25)]";
+  "bg-accent-primary text-white shadow-[0_10px_30px_rgba(168,85,247,0.3)]";
 
 function Navbar() {
   return (

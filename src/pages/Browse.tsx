@@ -84,7 +84,7 @@ function Browse() {
 
   return (
     <section className="space-y-8">
-      <div className="overflow-hidden rounded-[2rem] border border-border bg-[radial-gradient(circle_at_top_left,_rgba(222,91,60,0.25),_transparent_35%),linear-gradient(135deg,_rgba(28,34,48,0.96),_rgba(16,18,27,0.96))] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.3)]">
+      <div className="overflow-hidden rounded-[2rem] border border-border bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.28),_transparent_35%),linear-gradient(135deg,_rgba(28,34,48,0.96),_rgba(16,18,27,0.96))] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.3)]">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent-soft">Movie Night</p>
         <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-5xl">
           Search for a film, build the lineup, and keep the whole night organized.

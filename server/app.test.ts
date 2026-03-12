@@ -1,23 +1,92 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createServer } from "node:http";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { createApp } from "./app.js";
-import { createDatabase } from "./db.js";
+
+function createInMemoryWatchlistStore() {
+  const items = [];
+
+  return {
+    async list() {
+      return [...items].sort((left, right) => right.added_at.localeCompare(left.added_at));
+    },
+
+    async create(movie) {
+      const existing = items.find((item) => item.external_id === movie.externalId);
+
+      if (existing) {
+        return { row: existing, created: false };
+      }
+
+      const row = {
+        external_id: movie.externalId,
+        title: movie.title,
+        year: movie.year,
+        poster_url: movie.posterUrl,
+        genre: movie.genre,
+        description: movie.description,
+        runtime_minutes: movie.runtimeMinutes,
+        streaming_service: movie.streamingService,
+        priority: movie.priority,
+        planned_date: movie.plannedDate,
+        status: "want",
+        user_rating: null,
+        notes: "",
+        added_at: new Date().toISOString(),
+      };
+
+      items.push(row);
+      return { row, created: true };
+    },
+
+    async update(externalId, patch) {
+      const item = items.find((entry) => entry.external_id === externalId);
+
+      if (!item) {
+        return null;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(patch, "status")) {
+        item.status = patch.status;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "userRating")) {
+        item.user_rating = patch.userRating;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "notes")) {
+        item.notes = patch.notes;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "priority")) {
+        item.priority = patch.priority;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "plannedDate")) {
+        item.planned_date = patch.plannedDate;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "streamingService")) {
+        item.streaming_service = patch.streamingService;
+      }
+
+      return item;
+    },
+
+    async remove(externalId) {
+      const index = items.findIndex((item) => item.external_id === externalId);
+
+      if (index === -1) {
+        return { deleted: false };
+      }
+
+      items.splice(index, 1);
+      return { deleted: true };
+    },
+  };
+}
 
 describe("server app", () => {
   let server;
-  let db;
   let baseUrl;
-  let tempDir;
 
   beforeEach(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), "movie-night-"));
-    db = createDatabase(join(tempDir, "watchlist.db"));
-
     const app = createApp({
-      db,
+      watchlistStore: createInMemoryWatchlistStore(),
       movieProvider: {
         searchMovies: async (query) => [
           {
@@ -48,8 +117,6 @@ describe("server app", () => {
 
   afterEach(async () => {
     await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve(undefined))));
-    db.close();
-    rmSync(tempDir, { recursive: true, force: true });
   });
 
   it("returns movie search results from the provider", async () => {

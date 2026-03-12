@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import { validateCreateWatchlistPayload, validateWatchlistPatch } from "./validation.js";
 
-export function createApp({ db, movieProvider, clientOrigin = "*" }) {
+export function createApp({ watchlistStore, movieProvider, clientOrigin = "*" }) {
   const app = express();
 
   app.use(cors({ origin: clientOrigin }));
@@ -28,12 +28,17 @@ export function createApp({ db, movieProvider, clientOrigin = "*" }) {
     }
   });
 
-  app.get("/api/watchlist", (_req, res) => {
-    const rows = db.prepare("SELECT * FROM watchlist_items ORDER BY added_at DESC").all();
-    res.json(rows);
+  app.get("/api/watchlist", async (_req, res) => {
+    try {
+      const rows = await watchlistStore.list();
+      res.json(rows);
+    } catch (error) {
+      console.error("Failed to load watchlist", error);
+      res.status(500).json({ error: "Failed to load watchlist." });
+    }
   });
 
-  app.post("/api/watchlist", (req, res) => {
+  app.post("/api/watchlist", async (req, res) => {
     const validated = validateCreateWatchlistPayload(req.body);
 
     if (!validated.value) {
@@ -41,58 +46,18 @@ export function createApp({ db, movieProvider, clientOrigin = "*" }) {
     }
 
     const movie = validated.value;
-    const now = new Date().toISOString();
 
     try {
-      db.prepare(`
-        INSERT INTO watchlist_items (
-          external_id,
-          title,
-          year,
-          poster_url,
-          genre,
-          description,
-          runtime_minutes,
-          streaming_service,
-          priority,
-          planned_date,
-          added_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        movie.externalId,
-        movie.title,
-        movie.year,
-        movie.posterUrl,
-        movie.genre,
-        movie.description,
-        movie.runtimeMinutes,
-        movie.streamingService,
-        movie.priority,
-        movie.plannedDate,
-        now,
-      );
-
-      const created = db.prepare("SELECT * FROM watchlist_items WHERE external_id = ?").get(movie.externalId);
-      res.status(201).json(created);
+      const result = await watchlistStore.create(movie);
+      res.status(result.created ? 201 : 200).json(result.row);
     } catch (error) {
-      if (String(error).includes("UNIQUE") || String(error).includes("PRIMARY")) {
-        const existing = db.prepare("SELECT * FROM watchlist_items WHERE external_id = ?").get(movie.externalId);
-        return res.status(200).json(existing);
-      }
-
       console.error("Failed to add watchlist movie", error);
       res.status(500).json({ error: "Failed to add movie." });
     }
   });
 
-  app.patch("/api/watchlist/:externalId", (req, res) => {
+  app.patch("/api/watchlist/:externalId", async (req, res) => {
     const externalId = String(req.params.externalId);
-    const existing = db.prepare("SELECT * FROM watchlist_items WHERE external_id = ?").get(externalId);
-
-    if (!existing) {
-      return res.status(404).json({ error: "Not found." });
-    }
 
     const validated = validateWatchlistPatch(req.body);
 
@@ -100,39 +65,28 @@ export function createApp({ db, movieProvider, clientOrigin = "*" }) {
       return res.status(400).json({ error: validated.error });
     }
 
-    const patch = validated.value;
-    const nextStatus = patch.status ?? existing.status;
-    const nextRating = Object.prototype.hasOwnProperty.call(patch, "userRating") ? patch.userRating : existing.user_rating;
-    const nextNotes = Object.prototype.hasOwnProperty.call(patch, "notes") ? patch.notes : existing.notes;
-    const nextPriority = patch.priority ?? existing.priority;
-    const nextPlannedDate = Object.prototype.hasOwnProperty.call(patch, "plannedDate")
-      ? patch.plannedDate
-      : existing.planned_date;
-    const nextStreamingService = Object.prototype.hasOwnProperty.call(patch, "streamingService")
-      ? patch.streamingService
-      : existing.streaming_service;
+    try {
+      const updated = await watchlistStore.update(externalId, validated.value);
 
-    db.prepare(`
-      UPDATE watchlist_items
-      SET status = ?, user_rating = ?, notes = ?, priority = ?, planned_date = ?, streaming_service = ?
-      WHERE external_id = ?
-    `).run(
-      nextStatus,
-      nextRating,
-      nextNotes,
-      nextPriority,
-      nextPlannedDate,
-      nextStreamingService,
-      externalId,
-    );
+      if (!updated) {
+        return res.status(404).json({ error: "Not found." });
+      }
 
-    const updated = db.prepare("SELECT * FROM watchlist_items WHERE external_id = ?").get(externalId);
-    res.json(updated);
+      res.json(updated);
+    } catch (error) {
+      console.error("Failed to update watchlist movie", error);
+      res.status(500).json({ error: "Failed to update movie." });
+    }
   });
 
-  app.delete("/api/watchlist/:externalId", (req, res) => {
-    const result = db.prepare("DELETE FROM watchlist_items WHERE external_id = ?").run(String(req.params.externalId));
-    res.json({ deleted: result.changes > 0 });
+  app.delete("/api/watchlist/:externalId", async (req, res) => {
+    try {
+      const result = await watchlistStore.remove(String(req.params.externalId));
+      res.json(result);
+    } catch (error) {
+      console.error("Failed to remove watchlist movie", error);
+      res.status(500).json({ error: "Failed to remove movie." });
+    }
   });
 
   return app;

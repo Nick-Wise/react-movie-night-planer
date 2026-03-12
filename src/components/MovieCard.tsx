@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { MovieSearchResult, WatchlistItem } from "../types";
 import StarRating from "./StarRating";
 
@@ -44,7 +43,7 @@ function Poster({ src, alt }: { src?: string | null; alt: string }) {
 
 function MetaLine({ movie }: { movie: MovieSearchResult | WatchlistItem }) {
   const parts = [movie.year, movie.genre, movie.runtimeMinutes ? `${movie.runtimeMinutes} min` : null].filter(Boolean);
-  return <p className="mt-1 text-sm text-text-secondary">{parts.join(" • ") || "Movie"}</p>;
+  return <p className="mt-1 text-sm text-text-secondary">{parts.join(" | ") || "Movie"}</p>;
 }
 
 function BrowseActions({
@@ -73,10 +72,6 @@ function BrowseActions({
 type WatchlistControlsProps = {
   movie: WatchlistItem;
   isPending: boolean;
-  notesDraft: string;
-  streamingDraft: string;
-  onNotesDraftChange: (value: string) => void;
-  onStreamingDraftChange: (value: string) => void;
   onRemove: (externalId: string) => Promise<void> | void;
   onPatch: (
     externalId: string,
@@ -84,16 +79,7 @@ type WatchlistControlsProps = {
   ) => Promise<void> | void;
 };
 
-function WatchlistControls({
-  movie,
-  isPending,
-  notesDraft,
-  streamingDraft,
-  onNotesDraftChange,
-  onStreamingDraftChange,
-  onRemove,
-  onPatch,
-}: WatchlistControlsProps) {
+function WatchlistControls({ movie, isPending, onRemove, onPatch }: WatchlistControlsProps) {
   return (
     <div className="mt-5 space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -145,11 +131,11 @@ function WatchlistControls({
         <label className="block text-sm">
           <span className="mb-2 block font-semibold text-text-secondary">Streaming service</span>
           <input
+            key={`${movie.externalId}-streaming-${movie.streamingService ?? ""}`}
             type="text"
-            value={streamingDraft}
-            onChange={(event) => onStreamingDraftChange(event.target.value)}
-            onBlur={() => {
-              const nextValue = streamingDraft.trim() || null;
+            defaultValue={movie.streamingService ?? ""}
+            onBlur={(event) => {
+              const nextValue = event.target.value.trim() || null;
               if (nextValue !== movie.streamingService) {
                 void onPatch(movie.externalId, { streamingService: nextValue });
               }
@@ -188,12 +174,12 @@ function WatchlistControls({
       <label className="block text-sm">
         <span className="mb-2 block font-semibold text-text-secondary">Notes</span>
         <textarea
+          key={`${movie.externalId}-notes-${movie.notes}`}
           rows={3}
-          value={notesDraft}
-          onChange={(event) => onNotesDraftChange(event.target.value)}
-          onBlur={() => {
-            if (notesDraft !== movie.notes) {
-              void onPatch(movie.externalId, { notes: notesDraft });
+          defaultValue={movie.notes}
+          onBlur={(event) => {
+            if (event.target.value !== movie.notes) {
+              void onPatch(movie.externalId, { notes: event.target.value });
             }
           }}
           disabled={isPending}
@@ -216,20 +202,6 @@ function WatchlistControls({
 
 function MovieCard(props: MovieCardProps) {
   const isPending = props.isPending ?? false;
-  const [notesDraft, setNotesDraft] = useState(props.mode === "watchlist" ? props.movie.notes : "");
-  const [streamingDraft, setStreamingDraft] = useState(props.mode === "watchlist" ? props.movie.streamingService ?? "" : "");
-
-  useEffect(() => {
-    if (props.mode === "watchlist") {
-      setNotesDraft(props.movie.notes);
-      setStreamingDraft(props.movie.streamingService ?? "");
-    }
-  }, [
-    props.mode,
-    props.mode === "watchlist" ? props.movie.notes : "",
-    props.mode === "watchlist" ? props.movie.streamingService ?? "" : "",
-  ]);
-
   const movie = props.movie;
 
   return (
@@ -269,16 +241,7 @@ function MovieCard(props: MovieCardProps) {
             onAdd={props.onAdd}
           />
         ) : (
-          <WatchlistControls
-            movie={props.movie}
-            isPending={isPending}
-            notesDraft={notesDraft}
-            streamingDraft={streamingDraft}
-            onNotesDraftChange={setNotesDraft}
-            onStreamingDraftChange={setStreamingDraft}
-            onRemove={props.onRemove}
-            onPatch={props.onPatch}
-          />
+          <WatchlistControls movie={props.movie} isPending={isPending} onRemove={props.onRemove} onPatch={props.onPatch} />
         )}
       </div>
     </article>
